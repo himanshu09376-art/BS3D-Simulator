@@ -1,4 +1,5 @@
 import flet as ft
+import asyncio
 
 
 def main(page: ft.Page):
@@ -8,12 +9,19 @@ def main(page: ft.Page):
 
     dimension_content = ft.Column(spacing=10)
 
+
     dimensions_container = ft.Container(
         content=dimension_content,
+        opacity = 0,
+        animate_opacity = 500
     )
 
-    def change_dimensions(e):
+    async def change_dimensions(e):
         selected_beam = e.control.value
+
+        dimensions_container.opacity = 0
+        dimensions_container.update()
+        await asyncio.sleep(0.3)
         dimension_content.controls.clear()
 
         if selected_beam == "I-Beam":
@@ -24,11 +32,13 @@ def main(page: ft.Page):
                         size=16,
                         weight=ft.FontWeight.BOLD,
                         color="#0F172A",
+
                     ),
                     ft.TextField(label="Height", width=260),
                     ft.TextField(label="Flange Width", width=260),
                     ft.TextField(label="Flange Thickness", width=260),
                     ft.TextField(label="Web Thickness", width=260),
+
                 ]
             )
         elif selected_beam == "Rectangular":
@@ -56,8 +66,9 @@ def main(page: ft.Page):
                     ft.TextField(label="Diameter", width=260),
                 ]
             )
+        dimensions_container.opacity = 1
+        dimensions_container.update()
 
-        dimension_content.update()
 
     beam_type = ft.Dropdown(
         label="Select Beam Type",
@@ -77,7 +88,30 @@ def main(page: ft.Page):
         focused_border_color="#2563EB",
         border_radius=8,
         text_style=ft.TextStyle(color="#0F172A"),
-        on_select=change_dimensions,
+        on_select = change_dimensions,
+
+
+
+    )
+
+    load_type = ft.Dropdown(
+        label="Select Load Type",
+        width=200,
+        label_style=ft.TextStyle(color="#0F172A"),
+        options=[
+            ft.dropdown.Option(
+                "POINT LOAD", style=ft.ButtonStyle(color="#0F172A")
+            ),
+            ft.dropdown.Option(
+                "UDL", style=ft.ButtonStyle(color="#0F172A")
+            ),
+            ft.dropdown.Option("UVL", style=ft.ButtonStyle(color="#0F172A")),
+        ],
+        bgcolor="#FFFFFF",
+        border_color="#0F172A",
+        focused_border_color="#2563EB",
+        border_radius=8,
+        text_style=ft.TextStyle(color="#0F172A"),
     )
 
     # Left panel locked at width 300 with pure white background
@@ -100,6 +134,7 @@ def main(page: ft.Page):
                 ),
                 beam_type,
                 dimensions_container,
+                load_type
             ],
             spacing=15,
             scroll=ft.ScrollMode.AUTO,
@@ -110,7 +145,8 @@ def main(page: ft.Page):
         ft.Row(
             controls=[
                 left_panel,
-                ft.Container(expand=True),  # Keeps the rest right portion empty
+                ft.Container(expand=True),
+
             ],
             expand=True,
             spacing=0,
